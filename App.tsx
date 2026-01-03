@@ -288,6 +288,30 @@ const QuoteSection: React.FC = () => {
 };
 
 const ContactSection: React.FC = () => {
+  const [form, setForm] = useState({ name: '', phone: '', subject: 'Consulta General', message: '' });
+  const [errors, setErrors] = useState<{ name?: string; message?: string }>({});
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { id, value } = e.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+    setForm(prev => ({ ...prev, [id]: value }));
+    setErrors(prev => ({ ...prev, [id]: undefined }));
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const newErrors: typeof errors = {};
+    if (!form.name || form.name.trim().length < 2) newErrors.name = 'Ingresa tu nombre completo.';
+    if (!form.message || form.message.trim().length < 10) newErrors.message = 'Describe tu caso con al menos 10 caracteres.';
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
+
+    // Simular envío
+    setSubmitted(true);
+    setForm({ name: '', phone: '', subject: 'Consulta General', message: '' });
+    setTimeout(() => setSubmitted(false), 5000);
+  };
+
   return (
     <section id="contacto" className="py-20 px-4 md:px-10 bg-background-alt">
       <div className="max-w-[1080px] mx-auto">
@@ -295,8 +319,8 @@ const ContactSection: React.FC = () => {
           <h2 className="text-primary font-display text-[32px] font-bold mb-4">Sección de Contacto</h2>
           <p className="text-text-light font-body text-lg">Su consulta es el primer paso hacia una solución efectiva. Estamos aquí para guiarlo.</p>
         </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
-          
           {/* Info Side */}
           <div className="flex flex-col gap-8 order-2 lg:order-1">
             <div className="bg-white p-6 rounded-xl shadow-sm border border-background-alt">
@@ -349,21 +373,30 @@ const ContactSection: React.FC = () => {
 
           {/* Form Side */}
           <div className="bg-white p-8 rounded-2xl shadow-lg border-t-4 border-accent order-1 lg:order-2">
-            <form className="flex flex-col gap-5" onSubmit={(e) => e.preventDefault()}>
+            {submitted && (
+              <div className="mb-4 rounded-md bg-green-50 border border-green-200 p-3 text-green-800">Consulta enviada con éxito. Nos pondremos en contacto pronto.</div>
+            )}
+
+            <form className="flex flex-col gap-5" onSubmit={handleSubmit} noValidate>
               <div className="flex flex-col gap-1">
                 <label htmlFor="name" className="text-sm font-sans font-semibold text-text-dark">Nombre Completo</label>
                 <input 
                   type="text" 
                   id="name" 
+                  value={form.name}
+                  onChange={handleChange}
                   className="w-full rounded-lg border-background-alt border bg-background-light/50 px-3 py-2 focus:border-primary focus:ring-primary h-11 text-text-dark outline-none transition-all"
                   placeholder="Tu nombre" 
                 />
+                {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name}</p>}
               </div>
               <div className="flex flex-col gap-1">
                 <label htmlFor="phone" className="text-sm font-sans font-semibold text-text-dark">Teléfono / WhatsApp</label>
                 <input 
                   type="tel" 
                   id="phone" 
+                  value={form.phone}
+                  onChange={handleChange}
                   className="w-full rounded-lg border-background-alt border bg-background-light/50 px-3 py-2 focus:border-primary focus:ring-primary h-11 text-text-dark outline-none transition-all"
                   placeholder="Ej: 2954 123456" 
                 />
@@ -372,6 +405,8 @@ const ContactSection: React.FC = () => {
                 <label htmlFor="subject" className="text-sm font-sans font-semibold text-text-dark">Asunto</label>
                 <select 
                   id="subject"
+                  value={form.subject}
+                  onChange={handleChange}
                   className="w-full rounded-lg border-background-alt border bg-background-light/50 px-3 py-2 focus:border-primary focus:ring-primary h-11 text-text-dark outline-none transition-all"
                 >
                   <option>Consulta General</option>
@@ -386,12 +421,15 @@ const ContactSection: React.FC = () => {
                 <textarea 
                   id="message" 
                   rows={4}
+                  value={form.message}
+                  onChange={handleChange}
                   className="w-full rounded-lg border-background-alt border bg-background-light/50 px-3 py-2 focus:border-primary focus:ring-primary p-3 text-text-dark outline-none transition-all"
                   placeholder="Breve descripción de tu caso..." 
                 ></textarea>
+                {errors.message && <p className="text-sm text-red-500 mt-1">{errors.message}</p>}
               </div>
               <button 
-                type="button" 
+                type="submit" 
                 className="mt-2 w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 bg-primary hover:bg-primary-hover text-white text-base font-bold font-sans transition-all shadow-md active:transform active:scale-95"
               >
                 Enviar Consulta
